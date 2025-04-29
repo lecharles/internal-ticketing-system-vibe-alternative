@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Ticket - {{ ticket.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg leading-6 font-medium text-gray-900">
+                    Edit Ticket
+                </h2>
+                <a href="{{ url_for('tickets.view', ticket_id=ticket.id) }}"
+                   class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    Back to Ticket
+                </a>
+            </div>
+        </div>
+        <div class="border-t border-gray-200">
+            <form method="POST" class="space-y-8 divide-y divide-gray-200">
+                {{ form.hidden_tag() }}
+                <div class="px-4 py-5 sm:px-6 space-y-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <div class="mt-1">
+                            {{ form.title(class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md") }}
+                        </div>
+                        {% for error in form.title.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <div class="mt-1">
+                            {{ form.description(rows="4", class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border border-gray-300 rounded-md") }}
+                        </div>
+                        {% for error in form.description.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-3">
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                            <div class="mt-1">
+                                {{ form.status(class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md") }}
+                            </div>
+                            {% for error in form.status.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                            <div class="mt-1">
+                                {{ form.priority(class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md") }}
+                            </div>
+                            {% for error in form.priority.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <label for="assignee" class="block text-sm font-medium text-gray-700">Assignee</label>
+                            <div class="mt-1">
+                                {{ form.assignee(class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md") }}
+                            </div>
+                            {% for error in form.assignee.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 py-4 sm:px-6 flex justify-end space-x-3">
+                    <a href="{{ url_for('tickets.view', ticket_id=ticket.id) }}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                        Cancel
+                    </a>
+                    {{ form.submit(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
