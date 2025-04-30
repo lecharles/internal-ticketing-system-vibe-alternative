@@ -21,7 +21,7 @@ def create_app(config=None):
 
     # Configure the app
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-please-change')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Security headers
