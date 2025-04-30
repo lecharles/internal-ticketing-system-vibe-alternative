@@ -23,6 +23,7 @@ wheels/
 # Virtual Environment
 jira_env/
 venv/
+env/
 ENV/
 
 # IDE
@@ -32,18 +33,30 @@ ENV/
 *.swo
 .DS_Store
 
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
 # Flask
 instance/
 .webassets-cache
-.env
 
 # Database
 *.db
 *.sqlite3
 
 # Logs
-*.log
 logs/
+*.log
+
+# Node modules (if using npm for frontend)
+node_modules/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
 
 # Unit test / coverage reports
 htmlcov/
@@ -57,4 +70,4 @@ coverage.xml
 .hypothesis/
 
 # Migrations
-migrations/versions/__pycache__/ 
+migrations/versions/__pycache__/

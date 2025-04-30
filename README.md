@@ -1,32 +1,29 @@
-# Internal Ticket Management System
+# Internal Ticketing System (Vibe Alternative)
 
-A lightweight, self-hosted alternative to JIRA for internal software development tracking and planning.
-
-## Overview
-
-This system provides essential project management and ticket tracking functionality while maintaining simplicity and ease of use. It's designed to run on a single Postgres instance with a Flask backend, making it easy to deploy and maintain.
+A modern, Flask-based ticketing system designed as a lightweight, self-hosted alternative to JIRA for internal software development tracking and planning. Built with PostgreSQL backend and Tailwind CSS UI.
 
 ## Core Features
 
-- **Ticket Management**
+- **Ticket Management** 🎫
   - Create, update, and delete tickets
   - Assign tickets to team members
   - Set priority levels and status
   - Add comments and attachments
   - Track time estimates and actual time spent
 
-- **Project Organization**
+- **Project Organization** 📋
   - Create and manage multiple projects
   - Organize tickets into sprints
   - Kanban board view for visual tracking
   - Simple backlog management
 
-- **User Management**
+- **User Management** 🔐
   - Role-based access control (Admin, Project Lead, Developer, Viewer)
   - Team member profiles
   - Activity tracking
+  - Secure authentication
 
-- **Reporting**
+- **Reporting** 📊
   - Sprint velocity tracking
   - Basic burndown charts
   - Time tracking reports
@@ -45,9 +42,10 @@ This system provides essential project management and ticket tracking functional
 
 ### Frontend
 - HTML5
-- CSS3 (with Tailwind CSS)
+- CSS3 with Tailwind CSS
 - JavaScript (Vanilla JS + Alpine.js for interactivity)
-- No complex build process required
+- Responsive Design
+- Modern UI components
 
 ### Infrastructure
 - Single PostgreSQL instance
@@ -56,48 +54,62 @@ This system provides essential project management and ticket tracking functional
 
 ## Installation
 
-1. Clone the repository
+1. Clone the repository:
 ```bash
-git clone [repository-url]
-cd internal-jira
+git clone https://github.com/lecharles/internal-ticketing-system-vibe-alternative.git
+cd internal-ticketing-system-vibe-alternative
 ```
 
-2. Create a virtual environment
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Set up PostgreSQL
-- Create a new PostgreSQL database
-- Update the database configuration in `config.py`
+4. Set up environment variables:
+Create a `.env` file in the root directory with:
+```
+FLASK_APP=app
+FLASK_ENV=development
+DATABASE_URL=postgresql://username:password@localhost/internal_ticketing_dev
+SECRET_KEY=your-secret-key
+```
 
-5. Initialize the database
+5. Initialize the database:
 ```bash
 flask db upgrade
 ```
 
-6. Start the development server
+6. Start the development server:
 ```bash
 flask run
 ```
 
-## Configuration
-
-The application can be configured through environment variables or a `.env` file:
+## Project Structure
 
 ```
-DATABASE_URL=postgresql://user:password@localhost/dbname
-SECRET_KEY=your-secret-key
-DEBUG=True
+.
+├── app/
+│   ├── __init__.py
+│   ├── auth/          # Authentication views and forms
+│   ├── main/          # Core application views
+│   ├── tickets/       # Ticket management
+│   ├── models/        # Database models
+│   ├── static/        # Static files (CSS, JS)
+│   └── templates/     # Jinja2 templates
+├── migrations/        # Database migrations
+├── tests/            # Test suite
+├── config.py         # Configuration
+├── requirements.txt  # Production dependencies
+└── README.md
 ```
 
-## Development Setup
+## Development
 
 1. Install development dependencies:
 ```bash
@@ -109,35 +121,33 @@ pip install -r requirements-dev.txt
 pre-commit install
 ```
 
-3. Run tests:
+3. Create a new branch for your feature:
 ```bash
-pytest
+git checkout -b feature/your-feature-name
 ```
 
-## Project Structure
-
-```
-internal-jira/
-├── app/
-│   ├── models/         # Database models
-│   ├── views/          # Route handlers
-│   ├── templates/      # Jinja2 templates
-│   ├── static/         # Static files
-│   └── utils/          # Helper functions
-├── migrations/         # Database migrations
-├── tests/             # Test suite
-├── config.py          # Configuration
-├── requirements.txt   # Production dependencies
-└── requirements-dev.txt # Development dependencies
+4. Make your changes and commit:
+```bash
+git add .
+git commit -m "Add your feature description"
 ```
 
-## Contributing
+5. Push to your branch:
+```bash
+git push origin feature/your-feature-name
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests
-5. Submit a pull request
+## Testing
+
+Run the test suite with:
+```bash
+python -m pytest
+```
+
+For coverage report:
+```bash
+pytest --cov=app tests/
+```
 
 ## Security Considerations
 
@@ -147,21 +157,28 @@ internal-jira/
 - Input validation and sanitization
 - Regular security updates for dependencies
 
-## Backup and Maintenance
+## Contributing
 
-- Regular database backups recommended
-- Automated backup scripts provided
-- Database optimization guidelines included
-- Monitoring setup instructions available
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## License
 
-Internal use only. All rights reserved.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
 
-For internal support, contact the development team.
+For support, please open an issue in the GitHub repository.
+
+## Acknowledgments
+
+- Flask documentation and community
+- Tailwind CSS team
+- All contributors
 
 ---
 
-This project aims to provide a streamlined, maintainable alternative to JIRA while keeping the essential features needed for effective software development tracking. 
+Built with ❤️ using Flask and modern web technologies.
