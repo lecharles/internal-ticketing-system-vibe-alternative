@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">{{ team.name }}</h1>
+                    <p class="text-gray-600">{{ team.description }}</p>
+                </div>
+                {% if current_user == team.leader %}
+                <a href="{{ url_for('teams.edit_team', id=team.id) }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Edit Team
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4">Team Leader</h2>
+                <div class="flex items-center">
+                    <div class="bg-gray-200 rounded-full w-12 h-12 flex items-center justify-center">
+                        <span class="text-xl">{{ team.leader.username[0].upper() }}</span>
+                    </div>
+                    <div class="ml-4">
+                        <p class="font-semibold">{{ team.leader.username }}</p>
+                        <p class="text-gray-500">{{ team.leader.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Team Members</h2>
+                    {% if current_user == team.leader %}
+                    <a href="{{ url_for('teams.add_member', id=team.id) }}" class="text-blue-500 hover:text-blue-700">
+                        Add Member
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for member in team.members %}
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="bg-gray-200 rounded-full w-10 h-10 flex items-center justify-center">
+                                <span>{{ member.username[0].upper() }}</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="font-semibold">{{ member.username }}</p>
+                                <p class="text-gray-500 text-sm">{{ member.email }}</p>
+                            </div>
+                        </div>
+                        {% if current_user == team.leader and member != team.leader %}
+                        <form action="{{ url_for('teams.remove_member', team_id=team.id, user_id=member.id) }}" method="POST" class="inline">
+                            <button type="submit" class="text-red-500 hover:text-red-700" onclick="return confirm('Are you sure you want to remove this member?')">
+                                Remove
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="col-span-full text-center py-4 text-gray-500">
+                        No team members yet.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

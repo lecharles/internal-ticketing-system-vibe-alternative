@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+After you complete any small set of changes update the plan and make a Git commit. 
+
+Make as many frequent commits as possible so that we don't lose progress in between sessions. 
+
+Always check the plan every time you complete even one small element of the plan and then update it. 
+
+Ask clarifying questions, but no more than one at a time. 
+
+Don't delete failing tests 

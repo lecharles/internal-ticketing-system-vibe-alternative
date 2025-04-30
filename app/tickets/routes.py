@@ -1,9 +1,11 @@
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import login_required, current_user
 from app import db
 from app.tickets import bp
 from app.tickets.forms import TicketForm, CommentForm
-from app.models import Ticket, Comment, Project
+from app.models import Ticket, Comment, Project, Team
+from app.errors.exceptions import ResourceNotFoundError, AuthorizationError, DatabaseError
+import logging
 
 @bp.route('/tickets')
 @login_required
@@ -97,4 +99,109 @@ def add_comment(ticket_id):
         db.session.add(comment)
         db.session.commit()
         flash('Your comment has been added!', 'success')
-    return redirect(url_for('tickets.view', ticket_id=ticket.id)) 
+    return redirect(url_for('tickets.view', ticket_id=ticket.id))
+
+@bp.route('/tickets/<int:ticket_id>/delete', methods=['POST'])
+@login_required
+def delete(ticket_id):
+    """
+    Delete a ticket and its associated comments.
+    
+    Args:
+        ticket_id: The ID of the ticket to delete.
+        
+    Returns:
+        A redirect response to the ticket list.
+        
+    Raises:
+        ResourceNotFoundError: If the ticket doesn't exist.
+        AuthorizationError: If the user doesn't have permission to delete the ticket.
+        DatabaseError: If there's an error during deletion.
+    """
+    try:
+        ticket = Ticket.query.get(ticket_id)
+        if not ticket:
+            raise ResourceNotFoundError("Ticket", ticket_id)
+        
+        # Check if user has permission to delete
+        can_delete = (
+            ticket.creator_id == current_user.id or  # Creator can delete
+            current_user.role == 'admin' or          # Admin can delete
+            (                                        # Team lead/project manager of the project's team can delete
+                ticket.project and 
+                ticket.project.team and 
+                current_user in ticket.project.team.members and
+                ticket.project.team.get_member_role(current_user) in ['team_lead', 'project_manager']
+            )
+        )
+        
+        if not can_delete:
+            current_app.logger.warning(
+                f'User {current_user.username} attempted unauthorized deletion of ticket {ticket_id}',
+                extra={
+                    'user_id': current_user.id,
+                    'ticket_id': ticket_id,
+                    'user_role': current_user.role
+                }
+            )
+            raise AuthorizationError("You don't have permission to delete this ticket")
+        
+        # Log the deletion attempt
+        current_app.logger.info(
+            f'Deleting ticket {ticket_id}',
+            extra={
+                'user_id': current_user.id,
+                'ticket_id': ticket_id,
+                'ticket_title': ticket.title,
+                'project_id': ticket.project_id
+            }
+        )
+        
+        try:
+            # Delete associated comments first
+            Comment.query.filter_by(ticket_id=ticket.id).delete()
+            
+            # Delete the ticket
+            db.session.delete(ticket)
+            db.session.commit()
+            
+            current_app.logger.info(
+                f'Successfully deleted ticket {ticket_id}',
+                extra={
+                    'user_id': current_user.id,
+                    'ticket_id': ticket_id
+                }
+            )
+            
+            flash('Ticket has been deleted successfully.', 'success')
+            return redirect(url_for('tickets.list'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(
+                f'Database error while deleting ticket {ticket_id}',
+                exc_info=True,
+                extra={
+                    'user_id': current_user.id,
+                    'ticket_id': ticket_id
+                }
+            )
+            raise DatabaseError(f"Failed to delete ticket: {str(e)}")
+            
+    except (ResourceNotFoundError, AuthorizationError, DatabaseError) as e:
+        flash(str(e.message), 'error')
+        if isinstance(e, ResourceNotFoundError):
+            return redirect(url_for('tickets.list'))
+        return redirect(url_for('tickets.view', ticket_id=ticket_id))
+        
+    except Exception as e:
+        current_app.logger.error(
+            f'Unexpected error while deleting ticket {ticket_id}',
+            exc_info=True,
+            extra={
+                'user_id': current_user.id,
+                'ticket_id': ticket_id
+            }
+        )
+        flash('An unexpected error occurred. Please try again later.', 'error')
+        return redirect(url_for('tickets.list')) 

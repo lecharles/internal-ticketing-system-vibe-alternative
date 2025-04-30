@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Teams</h1>
+        <a href="{{ url_for('teams.create_team') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Create Team
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for team in teams %}
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-2">{{ team.name }}</h2>
+            <p class="text-gray-600 mb-4">{{ team.description }}</p>
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-500">Leader: {{ team.leader.username }}</span>
+                <a href="{{ url_for('teams.team_detail', id=team.id) }}" class="text-blue-500 hover:text-blue-700">
+                    View Details
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-8">
+            <p class="text-gray-500">No teams found. Create your first team!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

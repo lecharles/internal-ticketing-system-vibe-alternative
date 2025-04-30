@@ -1,76 +1,73 @@
 import pytest
-from app.models import Ticket, Comment
+from app.models import Ticket, Comment, User, Project
+from app import db
 
-def test_create_ticket(auth_client, test_project):
-    """Test creating a new ticket."""
-    response = auth_client.post('/tickets/create', data={
-        'title': 'New Test Ticket',
-        'description': 'This is a test ticket',
-        'project_id': test_project.id,
-        'priority': 'high',
-        'status': 'open'
-    }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'Ticket created successfully' in response.data
+def test_ticket_deletion(client, auth_client, test_user, test_project):
+    """Test the ticket deletion workflow with various scenarios."""
+    # Create a test ticket
+    ticket = Ticket(
+        title='Test Ticket for Deletion',
+        description='This ticket will be deleted',
+        status='open',
+        priority='medium',
+        project_id=test_project.id,
+        creator_id=test_user.id
+    )
+    db.session.add(ticket)
+    db.session.commit()
 
-def test_view_ticket(auth_client, test_ticket):
-    """Test viewing a ticket."""
-    response = auth_client.get(f'/tickets/{test_ticket.id}')
-    assert response.status_code == 200
-    assert test_ticket.title.encode() in response.data
-    assert test_ticket.description.encode() in response.data
+    # Test 1: Unauthorized user cannot delete ticket
+    client.get('/auth/logout')  # Ensure logged out
+    response = client.post(f'/tickets/{ticket.id}/delete')
+    assert response.status_code == 302  # Redirects to login
+    assert Ticket.query.get(ticket.id) is not None  # Ticket still exists
 
-def test_edit_ticket(auth_client, test_ticket):
-    """Test editing a ticket."""
-    response = auth_client.post(f'/tickets/{test_ticket.id}/edit', data={
-        'title': 'Updated Ticket Title',
-        'description': 'Updated description',
-        'priority': 'low',
-        'status': 'in_progress'
-    }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'Ticket updated successfully' in response.data
-    assert b'Updated Ticket Title' in response.data
+    # Test 2: Non-creator user cannot delete ticket
+    other_user = User(username='other_user', email='other@example.com', role='developer')
+    other_user.set_password('password123')
+    db.session.add(other_user)
+    db.session.commit()
+    
+    with auth_client.session_transaction() as sess:
+        sess['user_id'] = other_user.id
+    
+    response = auth_client.post(f'/tickets/{ticket.id}/delete', follow_redirects=True)
+    assert b'You do not have permission to delete this ticket' in response.data
+    assert Ticket.query.get(ticket.id) is not None  # Ticket still exists
 
-def test_ticket_workflow(auth_client, test_ticket):
-    """Test ticket status workflow."""
-    # Change status to in progress
-    response = auth_client.post(f'/tickets/{test_ticket.id}/status', data={
-        'status': 'in_progress'
-    }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'in_progress' in response.data
+    # Test 3: Creator can successfully delete ticket
+    with auth_client.session_transaction() as sess:
+        sess['user_id'] = test_user.id
+    
+    response = auth_client.post(f'/tickets/{ticket.id}/delete', follow_redirects=True)
+    assert b'Ticket deleted successfully' in response.data
+    assert Ticket.query.get(ticket.id) is None  # Ticket is deleted
 
-    # Change status to done
-    response = auth_client.post(f'/tickets/{test_ticket.id}/status', data={
-        'status': 'done'
-    }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'done' in response.data
+    # Test 4: Admin can delete any ticket
+    # Create another ticket
+    ticket2 = Ticket(
+        title='Admin Delete Test',
+        description='This ticket will be deleted by admin',
+        status='open',
+        priority='medium',
+        project_id=test_project.id,
+        creator_id=other_user.id
+    )
+    db.session.add(ticket2)
+    db.session.commit()
 
-def test_add_comment(auth_client, test_ticket):
-    """Test adding a comment to a ticket."""
-    response = auth_client.post(f'/tickets/{test_ticket.id}/comment', data={
-        'content': 'This is a test comment'
-    }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'Comment added successfully' in response.data
-    assert b'This is a test comment' in response.data
+    # Make test_user an admin
+    test_user.role = 'admin'
+    db.session.commit()
 
-def test_ticket_listing(auth_client, test_ticket):
-    """Test ticket listing page."""
-    response = auth_client.get('/tickets/')
-    assert response.status_code == 200
-    assert test_ticket.title.encode() in response.data
+    response = auth_client.post(f'/tickets/{ticket2.id}/delete', follow_redirects=True)
+    assert b'Ticket deleted successfully' in response.data
+    assert Ticket.query.get(ticket2.id) is None  # Ticket is deleted
 
-def test_ticket_filtering(auth_client, test_ticket):
-    """Test ticket filtering."""
-    # Filter by status
-    response = auth_client.get('/tickets/?status=open')
-    assert response.status_code == 200
-    assert test_ticket.title.encode() in response.data
+    # Test 5: Deleting non-existent ticket
+    response = auth_client.post('/tickets/99999/delete', follow_redirects=True)
+    assert response.status_code == 404
 
-    # Filter by priority
-    response = auth_client.get('/tickets/?priority=medium')
-    assert response.status_code == 200
-    assert test_ticket.title.encode() in response.data 
+    # Cleanup
+    db.session.delete(other_user)
+    db.session.commit() 

@@ -1,0 +1,12 @@
+---
+description: Useful context for tests.
+globs: 
+alwaysApply: false
+---
+When creating new tests, always create a configuration class that will handle all of the environment variables. 
+
+When creating tests, always make sure to have a Setup and Tear Down function that will set up a new test database, migrate and then tear it down and clean the data at the end. 
+
+Properly manage the database session in the test fixtures. Ensure that test data is handled properly and checks that only are needed for production only happen in production. 
+
+Make sure to set the application context whenever you need to. 

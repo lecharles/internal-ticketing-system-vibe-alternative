@@ -32,8 +32,8 @@
                     {% endfor %}
                 </div>
                 <div>
-                    {{ form.password2(class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm", placeholder="Confirm Password") }}
-                    {% for error in form.password2.errors %}
+                    {{ form.password_confirm(class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm", placeholder="Confirm Password") }}
+                    {% for error in form.password_confirm.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
